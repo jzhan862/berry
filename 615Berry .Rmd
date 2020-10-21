@@ -1,0 +1,326 @@
+---
+title: "MA615 berry assignment"
+author: "Jinzhe Zhang"
+date: "10/13/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(kableExtra)
+library(stats)
+## library(reshape2)
+library(tidyverse)
+library(magrittr)
+opts_chunk$set(echo = FALSE)
+```
+
+
+```{r  warning=FALSE, message=FALSE}
+df <- read.csv("BBBerry.csv")
+df2= read.csv("Fberry.csv")
+df3= read.csv("Tberry.csv")
+df4= read.csv("Wberry.csv")
+
+```
+
+
+```{r}
+
+#The following part is my EDA.
+# Due to there is only one factor that Value contain the numerical value in the table, I intend to focus on exploring the feature of this column.
+# I learned from Zhou yinfeng, tried to split the data into to four different types of berry that are : chemical treat, fertilize treat, Tame, Wild.
+# When I try to clean and organize the data, there are always some errors in my rstudio.
+# Finally instead of using R to clean the data, I tried to use EXCEL and Openrefine to clean and organize the data.
+# After cleaning the data, the abbreviation is the first problem I encountered. To avoid the char type data, I used the filter function in EXCEl to find all abbreviation in the Value column and replaced them by 0.
+# Honestly, it will be better if I replaced the abbreviation by the average of the rest of numerical value. However, since I tried to compare the total value in each state every year and there are zeros in every year, I think the sum of those value will offset the zeros bias effect. 
+
+
+
+
+#Here I will show four plots.
+# The first one is the plot contains 6 lines describe the variation between 2015,2017,2019 in every states with the chemical treatment.
+# The rest of them are the total value in every states with the chemical treatment in 2015,2017,2019.
+
+#Give the function to calculate the total value in every state in each year.
+
+Chemicaltreat=function(year,state,sources){
+           Sum_value=0
+           
+      for (i in 1:length(sources$State))
+      
+         if(sources$State[i]==state&sources$Year[i]==year)
+           
+           {Sum_value=Sum_value+sources$Value[i]}
+  
+        
+      return(Sum_value)
+}
+
+States=c("GEORGIA","MICHIGAN","NEW JERSEY","NORTH CAROLINA","OREGON","WASHINGTON")
+
+
+
+
+#Total value in 2019 for every state
+Value2019=c(Chemicaltreat(2019,"GEORGIA",df),Chemicaltreat(2019,"MICHIGAN",df),Chemicaltreat(2019,"NEW JERSEY",df),Chemicaltreat(2019,"NORTH CAROLINA",df),Chemicaltreat(2019,"OREGON",df),Chemicaltreat(2019,"WASHINGTON",df))
+
+
+#Total value in 2017 for every state
+Value2017=c(Chemicaltreat(2017,"GEORGIA",df),Chemicaltreat(2017,"MICHIGAN",df),Chemicaltreat(2017,"NEW JERSEY",df),Chemicaltreat(2017,"NORTH CAROLINA",df),Chemicaltreat(2017,"OREGON",df),Chemicaltreat(2017,"WASHINGTON",df))
+
+
+
+#Total value in 2015 for every state
+Value2015=c(Chemicaltreat(2015,"GEORGIA",df),Chemicaltreat(2015,"MICHIGAN",df),Chemicaltreat(2015,"NEW JERSEY",df),Chemicaltreat(2015,"NORTH CAROLINA",df),Chemicaltreat(2015,"OREGON",df),Chemicaltreat(2015,"WASHINGTON",df))
+
+
+
+
+# Plotting the plot contains 6 lines describe the variation between 2015,2017,2019 in every states with the chemical treatment.
+# Set the value range between (1e+5,6e+5)
+# From this plot, it is clear that the MICHIGAN state nearly have the most valuable berries in those years with the chemical treatment.
+# Washington's blueberry production is increasing year by year.
+# From the plot we can see the value in 2019 is the lowest value for the states located in the South and East part of America while  the value in 2017 is the lowest value for the states, OREGON and NORTH CAROLINA. Based on my research, I think that those changes are the results of Tropic storm and Hurricane.
+#https://www.usda.gov/media/press-releases/2019/09/09/usda-resources-available-farmers-hurt-2018-2019-disasters
+#Planting blueberry trees should be placed in a sunny and humid place. They can withstand high temperatures. Even if the temperature is about 40℃ in the summer sun, they will not be scorched. As long as they are poured enough water, they will all be in the high temperature of 40-50℃. It can grow, but if there is insufficient light, blueberries will stop growing, and even if they bloom, they will not bear fruit. 
+#https://www.hgtv.com/outdoors/landscaping-and-hardscaping/tips-on-growing-great-blueberries#:~:text=Blueberries%20are%20typically%20grown%20in,now%20has%20an%20enormous%20range.
+# However, the tropic storm and the hurricane will destroy the everything that growing the berry need.
+
+plot(c(2015,2017,2019),c(Chemicaltreat(2015,"MICHIGAN",df),Chemicaltreat(2017,"MICHIGAN",df),Chemicaltreat(2019,"MICHIGAN",df)),xlab="Year",ylab="Totalvalue",ylim=c(1e+5,6e+5))
+
+lines(c(2015,2017,2019),c(Chemicaltreat(2015,"MICHIGAN",df),Chemicaltreat(2017,"MICHIGAN",df),Chemicaltreat(2019,"MICHIGAN",df)),col="blue")
+
+par(new=TRUE)
+plot(c(2015,2017,2019),c(Chemicaltreat(2015,"GEORGIA",df),Chemicaltreat(2017,"GEORGIA",df),Chemicaltreat(2019,"GEORGIA",df)),xlab="Year",ylab="Totalvalue",ylim=c(1e+5,6e+5))
+
+
+lines(c(2015,2017,2019),c(Chemicaltreat(2015,"GEORGIA",df),Chemicaltreat(2017,"GEORGIA",df),Chemicaltreat(2019,"GEORGIA",df)),col="red")
+
+par(new=TRUE)
+plot(c(2015,2017,2019),c(Chemicaltreat(2015,"NEW JERSEY",df),Chemicaltreat(2017,"NEW JERSEY",df),Chemicaltreat(2019,"NEW JERSEY",df)),xlab="Year",ylab="Totalvalue",ylim=c(1e+5,6e+5))
+
+
+lines(c(2015,2017,2019),c(Chemicaltreat(2015,"NEW JERSEY",df),Chemicaltreat(2017,"NEW JERSEY",df),Chemicaltreat(2019,"NEW JERSEY",df)),col="black")
+par(new=TRUE)
+plot(c(2015,2017,2019),c(Chemicaltreat(2015,"NORTH CAROLINA",df),Chemicaltreat(2017,"NORTH CAROLINA",df),Chemicaltreat(2019,"NORTH CAROLINA",df)),xlab="Year",ylab="Totalvalue",ylim=c(1e+5,6e+5))
+
+
+lines(c(2015,2017,2019),c(Chemicaltreat(2015,"NORTH CAROLINA",df),Chemicaltreat(2017,"NORTH CAROLINA",df),Chemicaltreat(2019,"NORTH CAROLINA",df)),col="brown")
+par(new=TRUE)
+plot(c(2015,2017,2019),c(Chemicaltreat(2015,"OREGON",df),Chemicaltreat(2017,"OREGON",df),Chemicaltreat(2019,"OREGON",df)),xlab="Year",ylab="Totalvalue",ylim=c(1e+5,6e+5))
+
+
+lines(c(2015,2017,2019),c(Chemicaltreat(2015,"OREGON",df),Chemicaltreat(2017,"OREGON",df),Chemicaltreat(2019,"OREGON",df)),col="yellow")
+
+par(new=TRUE)
+plot(c(2015,2017,2019),c(Chemicaltreat(2015,"WASHINGTON",df),Chemicaltreat(2017,"WASHINGTON",df),Chemicaltreat(2019,"WASHINGTON",df)),xlab="Year",ylab="Totalvalue",ylim=c(1e+5,6e+5))
+
+
+lines(c(2015,2017,2019),c(Chemicaltreat(2015,"WASHINGTON",df),Chemicaltreat(2017,"WASHINGTON",df),Chemicaltreat(2019,"WASHINGTON",df)),col="pink")
+
+
+#G=GEORGIA
+legend("topleft", inset=.05, title="States",
+	 c("G","M","NJ","NC","O","W"), fill=c("red","blue","black","brown","yellow","pink"), horiz=TRUE)
+
+
+
+
+Chemicaltreat=data.frame(States,Value2019,Value2017,Value2015)
+
+#Plotting the plot contains total value in every states with the chemical treatment in 2015,2017,2019.
+
+bp2019 <- ggplot(Chemicaltreat, aes(x = States, y = Value2019))
+bp2019 <- bp2019 + geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1),
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 13, face = "bold")) +
+  labs(x = "State")
+
+bp2019
+
+bp2017 <- ggplot(Chemicaltreat, aes(x = States, y = Value2017))
+bp2017 <- bp2017 + geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1),
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 13, face = "bold")) +
+  labs(x = "State")
+
+
+bp2017
+
+bp2015 <- ggplot(Chemicaltreat, aes(x = States, y = Value2015))
+bp2015 <- bp2015 + geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1),
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 13, face = "bold")) +
+  labs(x = "State")
+
+
+
+bp2015
+
+```
+
+
+
+
+```{r}
+
+
+# find number of zeros in each year and state. 
+#Here the zeros are transformed from the abbreviations such as (D),(Z).
+
+
+Countzeros=function(year,state,sources){
+           Sum_value=0
+           
+      for (i in 1:length(sources$State))
+      
+         if(sources$State[i]==state&sources$Year[i]==year&sources$Value[i]==0)
+           
+           {Sum_value=Sum_value+1}
+  
+        
+      return(Sum_value)
+}
+
+print(Countzeros(2019,"GEORGIA",df))
+print(Countzeros(2019,"WASHINGTON",df))
+print(Countzeros(2019,"NEW JERSEY",df))
+print(Countzeros(2019,"NORTH CAROLINA",df))
+print(Countzeros(2019,"MICHIGAN",df))
+print(Countzeros(2019,"OREGON",df))
+
+print(Countzeros(2015,"GEORGIA",df))
+print(Countzeros(2015,"WASHINGTON",df))
+print(Countzeros(2015,"NEW JERSEY",df))
+print(Countzeros(2015,"NORTH CAROLINA",df))
+print(Countzeros(2015,"MICHIGAN",df))
+print(Countzeros(2015,"OREGON",df))
+
+print(Countzeros(2017,"GEORGIA",df))
+print(Countzeros(2017,"WASHINGTON",df))
+print(Countzeros(2017,"NEW JERSEY",df))
+print(Countzeros(2017,"NORTH CAROLINA",df))
+print(Countzeros(2017,"MICHIGAN",df))
+print(Countzeros(2017,"OREGON",df))
+
+
+```
+
+
+
+```{r}
+
+#shiny part
+library(shiny)
+
+
+ui=navbarPage(
+  title = 'DataTable Options',
+  tabPanel('ChemicialTreat',     DT::dataTableOutput('ex1')),
+  tabPanel('Fertilizetreat',     DT::dataTableOutput('ex2')),
+   tabPanel('Tame',     DT::dataTableOutput('ex3')),
+  tabPanel('Wild',     DT::dataTableOutput('ex4')),
+  tabPanel("Totalvalue-2015",plotOutput(outputId = 'plot')),
+  tabPanel("Totalvalue-2017",plotOutput(outputId = 'plot2')),
+  tabPanel("Totalvalue-2019",plotOutput(outputId = 'plot3'))
+  
+  
+  
+
+)
+
+
+
+server=function(input, output) {
+  # display 10 rows initially
+  output$ex1 <- DT::renderDataTable(
+    DT::datatable({
+        df}
+    )
+  )
+
+  # -1 means no pagination; the 2nd element contains menu labels
+  output$ex2 <- DT::renderDataTable(
+    DT::datatable(
+      {df2}
+      )
+    )
+   output$ex3 <- DT::renderDataTable(
+    DT::datatable(
+      {df3}
+      )
+    )
+    output$ex4 <- DT::renderDataTable(
+    DT::datatable(
+      {df4}
+      )
+    )
+  output$plot=renderPlot({bp2015})
+  output$plot2=renderPlot({bp2017})
+  output$plot3=renderPlot({bp2019})
+  
+  
+
+}
+
+shinyApp(ui = ui, server = server)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
